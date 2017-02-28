@@ -1,0 +1,12 @@
+export PI_INCLUDES += -I$(RIOTCPU)/pi/include -I$(RIOTBASE)/sys/include
+
+# Local include for OSX
+ifeq ($(BUILDOSXNATIVE),1)
+    export PI_INCLUDES += -I$(RIOTCPU)/pi/osx-libc-extra
+endif
+
+export USEMODULE += periph
+
+ifeq ($(shell uname -s),Darwin)
+export CFLAGS += -D_XOPEN_SOURCE=600 -D_DARWIN_C_SOURCE
+endif
