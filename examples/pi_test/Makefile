@@ -1,5 +1,5 @@
 # name of your application
-APPLICATION = default
+APPLICATION = pi_example
 
 # If no BOARD is found in the environment, use this default:
 BOARD ?= pi
@@ -27,35 +27,52 @@ CFLAGS += -DDEVELHELP
 # Change this to 0 show compiler invocation lines by default:
 QUIET ?= 1
 
-# Modules to include:
+
+
+
+
+
+# Include packages that pull up and auto-init the link layer.
+# NOTE: 6LoWPAN will be included if IEEE802.15.4 devices are present
+USEMODULE += gnrc_netdev_default
+USEMODULE += auto_init_gnrc_netif
+# Specify the mandatory networking modules for IPv6 and UDP
+USEMODULE += gnrc_ipv6_router_default
+USEMODULE += gnrc_udp
+# Add a routing protocol
+USEMODULE += gnrc_rpl
+USEMODULE += auto_init_gnrc_rpl
+# This application dumps received packets to STDIO using the pktdump module
+USEMODULE += gnrc_pktdump
+# Additional networking modules that can be dropped if not needed
+USEMODULE += gnrc_icmpv6_echo
+# Add also the shell, some shell commands
 USEMODULE += shell
 USEMODULE += shell_commands
 USEMODULE += ps
-# include and auto-initialize all available sensors
+USEMODULE += netstats_l2
+USEMODULE += netstats_ipv6
+USEMODULE += netstats_rpl
 USEMODULE += saul_default
 
-BOARD_PROVIDES_NETIF := airfy-beacon cc2538dk fox iotlab-m3 iotlab-a8-m3 mulle \
-        microbit native nrf51dongle nrf52dk nrf6310 openmote-cc2538 pba-d-01-kw2x \
-        pca10000 pca10005 remote-pa remote-reva saml21-xpro samr21-xpro \
-        spark-core telosb yunjia-nrf51822 z1
 
-ifneq (,$(filter $(BOARD),$(BOARD_PROVIDES_NETIF)))
-  # Use modules for networking
-  # gnrc is a meta module including all required, basic gnrc networking modules
-  USEMODULE += gnrc
-  # use the default network interface for the board
-  USEMODULE += gnrc_netdev_default
-  # automatically initialize the network interface
-  USEMODULE += auto_init_gnrc_netif
-  # shell command to send L2 packets with a simple string
-  USEMODULE += gnrc_txtsnd
-  # the application dumps received packets to stdout
-  USEMODULE += gnrc_pktdump
-
-  # We use only the lower layers of the GNRC network stack, hence, we can
-  # reduce the size of the packet buffer a bit
-  CFLAGS += -DGNRC_PKTBUF_SIZE=512
-endif
+#ifneq (,$(filter $(BOARD),$(BOARD_PROVIDES_NETIF)))
+#  # Use modules for networking
+#  # gnrc is a meta module including all required, basic gnrc networking modules
+#  USEMODULE += gnrc
+#  # use the default network interface for the board
+#  USEMODULE += gnrc_netdev_default
+#  # automatically initialize the network interface
+#  USEMODULE += auto_init_gnrc_netif
+#  # shell command to send L2 packets with a simple string
+#  USEMODULE += gnrc_txtsnd
+#  # the application dumps received packets to stdout
+#  USEMODULE += gnrc_pktdump
+#
+#  # We use only the lower layers of the GNRC network stack, hence, we can
+#  # reduce the size of the packet buffer a bit
+#  CFLAGS += -DGNRC_PKTBUF_SIZE=512
+#endif
 
 FEATURES_OPTIONAL += config
 FEATURES_OPTIONAL += periph_rtc

@@ -70,6 +70,18 @@
 #ifndef UART_NUMOF
 #define UART_NUMOF (1U)
 #endif
+
+
+
+#define PERIPH_SPI_NEEDS_INIT_CS
+#define PERIPH_SPI_NEEDS_TRANSFER_BYTE
+#define PERIPH_SPI_NEEDS_TRANSFER_REG
+#define PERIPH_SPI_NEEDS_TRANSFER_REGS
+
+
+
+
+
 /** @} */
 
 #ifdef __cplusplus

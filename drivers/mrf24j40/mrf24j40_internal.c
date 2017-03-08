@@ -206,6 +206,7 @@ void mrf24j40_rx_fifo_read(mrf24j40_t *dev, const uint16_t offset, uint8_t *data
 void mrf24j40_rx_fifo_write(mrf24j40_t *dev, const uint16_t offset, const uint8_t *data, const size_t len)
 {
     uint16_t i;
+    (void)offset;
 
     for (i = 0; i < len; i++) {
         mrf24j40_reg_write_long(dev, i, data[i]);

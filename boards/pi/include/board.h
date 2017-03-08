@@ -47,7 +47,38 @@ void _native_LED_RED_TOGGLE(void);
 #define LED1_ON             (_native_LED_GREEN_ON())
 #define LED1_OFF            (_native_LED_GREEN_OFF())
 #define LED1_TOGGLE         (_native_LED_GREEN_TOGGLE())
+
+
+
+
+#define PERIPH_SPI_NEEDS_TRANSFER_BYTE
+#define PERIPH_SPI_NEEDS_TRANSFER_REG
+#define PERIPH_SPI_NEEDS_TRANSFER_REGS
+
 /** @} */
+
+
+
+
+
+#define SPI_NUMOF           (1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #ifdef __cplusplus
 }
