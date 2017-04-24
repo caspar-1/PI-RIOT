@@ -14,7 +14,7 @@ typedef unsigned char uint8_t;
 #define MOCK_HARDWARE
 int spi_fd = -1;
 
-const char *p_dev = "/dev/spidev1.0";
+const char *p_dev = "/dev/spidev0.0";
 
 static mutex_t lock = MUTEX_INIT;
 
@@ -92,7 +92,7 @@ int spi_acquire(spi_t bus, spi_cs_t cs, spi_mode_t mode, spi_clk_t clk)
     spi_fd = open(p_dev, O_RDWR | O_NOCTTY);
     if (spi_fd < 0)
     {
-        printf("Error opening spidev0.1. Error: %s\n", strerror(errno));
+        printf("Error opening %s Error: %s\n", p_dev,strerror(errno));
         return -1;
     }
 
@@ -124,11 +124,37 @@ void spi_release(spi_t bus)
 
 void spi_transfer_bytes(spi_t bus, spi_cs_t cs, bool cont, const void *out, void *in, size_t len)
 {
+    size_t lp=0;
+
     (void)bus;
     (void)cs;
     (void)cont;
     printf("spi_transfer_bytes [bus=%d,cs=%d,cont=%d]\n", bus, cs, cont);
     _spi_transfer((unsigned char *)out, (unsigned char *)in, len);
+    if(out!=0)
+    {
+        printf("\nTx:");
+        for(lp=0;lp<len;lp++)
+        {
+            printf("%02X,",((unsigned char*)out)[lp]);
+        }
+    }
+    if(in!=0)
+    {
+        printf("\nRx:");
+        for(lp=0;lp<len;lp++)
+        {
+            printf("%02X,",((unsigned char*)in)[lp]);
+        }
+        printf("\n");
+    }
+    usleep(1000000);
+
+
+    
+    
+    
+    
 }
 
 uint8_t spi_transfer_byte(spi_t bus, spi_cs_t cs, bool cont, uint8_t out)

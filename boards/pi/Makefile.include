@@ -1,15 +1,40 @@
-export PI_INCLUDES += -DPI_INCLUDES
-export PI_INCLUDES += -I$(RIOTBOARD)/$(BOARD)/include/
-export PI_INCLUDES += -I$(RIOTBASE)/core/include/
-export PI_INCLUDES += -I$(RIOTBASE)/drivers/include/
+CROSS = 1
+
+
+
+ifeq ($(CROSS),1)
+    export PI_INCLUDES += -DPI_INCLUDES
+    export PI_INCLUDES += -I$(RIOTBOARD)/$(BOARD)/include/
+    export PI_INCLUDES += -I$(RIOTBASE)/core/include/
+    export PI_INCLUDES += -I$(RIOTBASE)/drivers/include/
+
+
+    export ELF = $(BINDIR)/$(APPLICATION).elf
+    export PREFIX = arm-linux-gnueabihf-
+    #export PATH := $(HOME)/TOOLS/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin:$(PATH)
+    
+    
+else
+    export PI_INCLUDES += -DPI_INCLUDES
+    export PI_INCLUDES += -I$(RIOTBOARD)/$(BOARD)/include/
+    export PI_INCLUDES += -I$(RIOTBASE)/core/include/
+    export PI_INCLUDES += -I$(RIOTBASE)/drivers/include/
+
+
+    export ELF = $(BINDIR)/$(APPLICATION).elf
+    export PREFIX =
+    
+    
+    ARCH_FLAGS = -m32
+endif
 
 export CPU = pi
-export ELF = $(BINDIR)/$(APPLICATION).elf
+
 
 USEMODULE += pi-drivers
 
 # toolchain:
-export PREFIX =
+
 export CC ?= $(PREFIX)gcc
 export CXX ?= $(PREFIX)g++
 ifeq ($(LTO),1)
@@ -48,14 +73,14 @@ export GPROF ?= gprof
 # basic cflags:
 export CFLAGS += -Wall -Wextra -pedantic -std=gnu99
 ifeq ($(shell uname -m),x86_64)
-export CFLAGS += -m32
+export CFLAGS += $(ARCH_FLAGS)
 endif
 ifneq (,$(filter -DDEVELHELP,$(CFLAGS)))
 export CFLAGS += -fstack-protector-all
 endif
 ifeq ($(shell uname -s),FreeBSD)
 ifeq ($(shell uname -m),amd64)
-export CFLAGS += -m32 -DCOMPAT_32BIT -B/usr/lib32
+export CFLAGS += $(ARCH_FLAGS) -DCOMPAT_32BIT -B/usr/lib32
 endif
 endif
 ifeq ($(shell uname -s),Darwin)
@@ -67,11 +92,11 @@ export CXXUWFLAGS +=
 export CXXEXFLAGS +=
 
 ifeq ($(shell uname -m),x86_64)
-export LINKFLAGS += -m32
+export LINKFLAGS += $(ARCH_FLAGS)
 endif
 ifeq ($(shell uname -s),FreeBSD)
 ifeq ($(shell uname -m),amd64)
-export LINKFLAGS += -m32 -DCOMPAT_32BIT -L/usr/lib32 -B/usr/lib32
+export LINKFLAGS += $(ARCH_FLAGS) -DCOMPAT_32BIT -L/usr/lib32 -B/usr/lib32
 endif
 export LINKFLAGS += -L $(BINDIR)
 else
