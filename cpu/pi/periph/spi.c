@@ -11,9 +11,9 @@
 #include <unistd.h>
 
 typedef unsigned char uint8_t;
-#define MOCK_HARDWARE
+//#define MOCK_HARDWARE
 int spi_fd = -1;
-
+bool debug = 0;
 const char *p_dev = "/dev/spidev0.0";
 
 static mutex_t lock = MUTEX_INIT;
@@ -30,13 +30,15 @@ int _spi_transfer(unsigned char *sendBuffer, unsigned char *receiveBuffer, int b
     xfer.rx_buf = (unsigned long)receiveBuffer;
     xfer.len = bytes;
 
-    printf("_spi_transfer[%d]:", bytes);
-    for (lp = 0; lp < bytes; lp++)
+    if(debug)
     {
-        printf(" 0x%02x", sendBuffer[lp]);
+        printf("_spi_transfer[%d]:", bytes);
+        for (lp = 0; lp < bytes; lp++)
+        {
+            printf(" 0x%02x", sendBuffer[lp]);
+        }
+        printf("\n");
     }
-    printf("\n");
-
 #ifdef MOCK_HARDWARE
     usleep(1000000);
 #else
@@ -71,11 +73,11 @@ int spi_acquire(spi_t bus, spi_cs_t cs, spi_mode_t mode, spi_clk_t clk)
     (void)cs;
     (void)mode;
     (void)clk;
-    printf("spi_acquire++++++\n");
+    if(debug)printf("spi_acquire++++++\n");
     /* lock bus */
     mutex_lock(&lock);
 
-    int spi_speed = 1000000;
+    int spi_speed = 100000;
 
 //mode |= SPI_LOOP;
 //mode |= SPI_CPHA;
@@ -117,7 +119,7 @@ int spi_acquire(spi_t bus, spi_cs_t cs, spi_mode_t mode, spi_clk_t clk)
 void spi_release(spi_t bus)
 {
     (void)bus;
-    printf("spi_release-------\n");
+    if(debug)printf("spi_release-------\n");
     mutex_unlock(&lock);
     close(spi_fd);
 }
@@ -129,26 +131,30 @@ void spi_transfer_bytes(spi_t bus, spi_cs_t cs, bool cont, const void *out, void
     (void)bus;
     (void)cs;
     (void)cont;
-    printf("spi_transfer_bytes [bus=%d,cs=%d,cont=%d]\n", bus, cs, cont);
+    if(debug)printf("spi_transfer_bytes [bus=%d,cs=%d,cont=%d]\n", bus, cs, cont);
     _spi_transfer((unsigned char *)out, (unsigned char *)in, len);
-    if(out!=0)
+    
+    if(debug)
     {
-        printf("\nTx:");
-        for(lp=0;lp<len;lp++)
+        if(out!=0)
         {
-            printf("%02X,",((unsigned char*)out)[lp]);
+            printf("\nTx:");
+            for(lp=0;lp<len;lp++)
+            {
+                printf("%02X,",((unsigned char*)out)[lp]);
+            }
+        }
+        if(in!=0)
+        {
+            printf("\nRx:");
+            for(lp=0;lp<len;lp++)
+            {
+                printf("%02X,",((unsigned char*)in)[lp]);
+            }
+            printf("\n");
         }
     }
-    if(in!=0)
-    {
-        printf("\nRx:");
-        for(lp=0;lp<len;lp++)
-        {
-            printf("%02X,",((unsigned char*)in)[lp]);
-        }
-        printf("\n");
-    }
-    usleep(1000000);
+    usleep(100);
 
 
     
@@ -159,22 +165,28 @@ void spi_transfer_bytes(spi_t bus, spi_cs_t cs, bool cont, const void *out, void
 
 uint8_t spi_transfer_byte(spi_t bus, spi_cs_t cs, bool cont, uint8_t out)
 {
-    uint8_t in;
-    printf("spi_transfer_byte\n");
+    uint8_t in = 0xff;
+    if(debug)printf("spi_transfer_byte out>>0X%02x",out);
     spi_transfer_bytes(bus, cs, cont, &out, &in, 1);
+    if(debug)printf(" in<<0X%02x\n",in);
+    //usleep(1000000);
     return in;
 }
 
 uint8_t spi_transfer_reg(spi_t bus, spi_cs_t cs, uint8_t reg, uint8_t out)
 {
-    printf("spi_transfer_reg\n");
+    
+    uint8_t in = 0xff;
+    if(debug)printf("spi_transfer_reg reg>>0X%02x  data>>0X%02x    <",reg,out);
     spi_transfer_bytes(bus, cs, true, &reg, NULL, 1);
-    return spi_transfer_byte(bus, cs, false, out);
+    in = spi_transfer_byte(bus, cs, false, out);
+    if(debug)printf(">  in<<0X%02x\n",in);
+    return in;
 }
 
 void spi_transfer_regs(spi_t bus, spi_cs_t cs, uint8_t reg, const void *out, void *in, size_t len)
 {
-    printf("spi_transfer_regs\n");
+    if(debug)printf("spi_transfer_regs\n");
     spi_transfer_bytes(bus, cs, true, &reg, NULL, 1);
     spi_transfer_bytes(bus, cs, false, out, in, len);
 }

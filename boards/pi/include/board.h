@@ -57,27 +57,12 @@ void _native_LED_RED_TOGGLE(void);
 
 /** @} */
 
-
+//set up pins used by MRF24J40 interface
+#define MRF24J40_PARAM_RESET        (GPIO_PIN(0, 13))
 
 
 
 #define SPI_NUMOF           (1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #ifdef __cplusplus
